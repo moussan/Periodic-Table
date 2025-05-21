@@ -1,13 +1,15 @@
 <script>
 <!-- Import the ElementCell component -->
-  import ElementCell from '$lib/ElementCell.svelte';
+  import ElementCell from './ElementCell.svelte';
 // Import the createEventDispatcher to dispatch custom events
   import { createEventDispatcher } from 'svelte';
+// Import the periodic table data from the JSON file
+  import periodicTableData from '$lib/data/PeriodicTableJSON.json';
 
 // Props passed into the component
-  export let elements = []; // Full list of elements from JSON
+  export let elements = periodicTableData.elements; // Full list of elements from JSON
   export let maxC = 18; // Max columns for the main table
-  export let maxR = 7;  // Max rows for the main table (not including lanthanides/actinides below)
+  export let maxR = 7; // Max rows for the main table (not including lanthanides/actinides below)
   export let elementMap; // Map for quick lookup: `${xpos}-${ypos}` -> element
 
 // Initialize the event dispatcher
@@ -19,11 +21,11 @@
   // Define the atomic number range for Lanthanides
   const lanthanideRange = { start: 57, end: 71 }; // La to Lu
   const actinideRange = { start: 89, end: 103 };  // Ac to Lr
-
+  
   // Placeholder for Lanthanides and Actinides in the main table
   const lanthanidePlaceholder = { xpos: 3, ypos: 6, symbol: 'La-Lu', number: '57-71', name:'Lanthanides', category: 'lanthanide-placeholder' };
   const actinidePlaceholder = { xpos: 3, ypos: 7, symbol: 'Ac-Lr', number: '89-103', name:'Actinides', category: 'actinide-placeholder' };
-  
+
   // Separate Lanthanides and Actinides for bottom rows
   let lanthanides = elements.filter(el => el.number >= lanthanideRange.start && el.number <= lanthanideRange.end);
   let actinides = elements.filter(el => el.number >= actinideRange.start && el.number <= actinideRange.end);

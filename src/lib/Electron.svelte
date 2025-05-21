@@ -34,7 +34,6 @@
 <circle
   <!-- Attributes for the SVG circle representing the electron -->
   cx={x}
-  cy={y}
   r={electronRadius}
   fill={color}
   stroke="#333"

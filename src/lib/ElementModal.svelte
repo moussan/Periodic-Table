@@ -35,8 +35,11 @@
   let iframeStyle = "width: 100%; height: 100%; border: none;";
 </script>
 
-<!-- The modal backdrop creates a dark overlay behind the modal content and handles closing the modal when clicked outside the content. -->
-<div class="modal-backdrop" on:click={close} role="dialog" aria-modal="true" aria-labelledby="modal-title">
+<!-- 
+  The modal backdrop creates a dark overlay behind the modal content.
+  It's a button to handle closing the modal when clicked outside the content, improving accessibility. 
+-->
+<button class="modal-backdrop" on:click={close} aria-label="Close modal" role="button" aria-modal="true" aria-labelledby="modal-title">
   <div class="modal-content" on:click|stopPropagation>
     <header class="modal-header">
       <h2 id="modal-title">{element.name} ({element.symbol})</h2>
@@ -57,13 +60,18 @@
         {/if}
     </div>
   </div>
-</div>
+</button>
 
 <style>
   .modal-backdrop {
     position: fixed;
     top: 0;
     left: 0;
+    /* Added styles to make the button look like the original div */
+    background-color: rgba(0, 0, 0, 0.6);
+    border: none; /* Remove default button border */
+    padding: 0; /* Remove default button padding */
+    margin: 0; /* Remove default button margin */
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.6);
@@ -72,6 +80,7 @@
     align-items: center;
     z-index: 1000;
   }
+  
 
   .modal-content {
     background-color: #fff;

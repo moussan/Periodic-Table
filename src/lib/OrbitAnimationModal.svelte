@@ -132,7 +132,7 @@
     on:click|stopPropagation
     style="transform: translate({modalPos.x}px, {modalPos.y}px); width: {size}px; max-width: 98vw; min-width: 220px;"
     <!-- Apply a scale transition when the modal appears/disappears -->
-    transition:scale|local={{ duration: 180 }}
+    transition:scale|local={{ duration: 180 }}>
   >
     <header class="modal-header" on:pointerdown={onHeaderPointerDown} style="cursor: move;">
       <h2 id="orbit-modal-title">{element.name} ({element.symbol})</h2>

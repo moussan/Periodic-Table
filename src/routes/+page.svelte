@@ -3,7 +3,7 @@
   import PeriodicTable from '$lib/PeriodicTable.svelte';
   import ElementModal from '$lib/ElementModal.svelte';
   import elementsData from '$lib/data/PeriodicTableJSON.json';
-  import OrbitAnimationModal from '$lib/OrbitAnimationModal.svelte';
+  import { OrbitAnimationModal } from '$lib/OrbitAnimationModal.svelte';
   import FLogo from '$lib/FLogo.svelte';
   import { onMount } from 'svelte';
 
@@ -239,17 +239,6 @@
     transition: background 0.3s;
     /* Smooth transition for background color */
   }
-  .app-header.scrolled {
-    /* Background color when the page is scrolled */
-    background: #111;
-  }
-  /* Styling for the left side of the header */
-  .header-left {
-    display: flex;
-    align-items: center;
-    min-width: 40px;
-    gap: 1.2em;
-  }
   /* Styling for the header title */
   .app-header h1 {
     margin-bottom: 0;
@@ -384,19 +373,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-  }
-  /* Styling for the SVG inside the orbital container */
-  .legend-orbital-svg-inside {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0.7em;
-    margin: 0 auto;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    pointer-events: none;
   }
   /* Media query for smaller screens (max-width 600px) */
   @media (max-width: 600px) {
