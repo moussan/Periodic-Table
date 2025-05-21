@@ -1,4 +1,5 @@
 <script>
+  // Define a prop 'size' with a default value of 40. This controls the overall size of the SVG.
   export let size = 40;
 </script>
 <svg width={size} height={size} viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Feynman diagram logo">
@@ -8,17 +9,22 @@
       <path d="M0,0 L6,3 L0,6 L2,3 Z" fill="#333" />
     </marker>
     <pattern id="wavy" width="8" height="8" patternUnits="userSpaceOnUse">
+      <!-- Define a wavy pattern for the photon lines -->
       <path d="M0,4 Q2,0 4,4 T8,4" stroke="#bb86fc" stroke-width="1.5" fill="none"/>
     </pattern>
   </defs>
   <!-- Incoming fermion -->
+  <!-- A straight line representing an incoming particle -->
   <line x1="10" y1="10" x2="60" y2="20" stroke="#333" stroke-width="2" marker-end="url(#arrow)" />
   <!-- Outgoing fermion -->
+  <!-- A straight line representing an outgoing particle -->
   <line x1="60" y1="20" x2="110" y2="10" stroke="#333" stroke-width="2" marker-end="url(#arrow)" />
   <!-- Loop (virtual particle) -->
+  <!-- An elliptical and curved path forming a loop, representing a virtual particle -->
   <ellipse cx="80" cy="25" rx="15" ry="8" stroke="#333" stroke-width="2" fill="none" />
   <path d="M65 25 Q80 40 95 25" stroke="#333" stroke-width="2" fill="none" />
   <!-- Photon (wavy) lines -->
+  <!-- Curved paths using the defined wavy pattern, representing photons -->
   <path d="M60 20 Q65 10 80 10 Q95 10 100 20" stroke="url(#wavy)" stroke-width="2" fill="none" />
   <path d="M60 20 Q65 30 80 30 Q95 30 100 20" stroke="url(#wavy)" stroke-width="2" fill="none" />
   <!-- Vertex dots -->

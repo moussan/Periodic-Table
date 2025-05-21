@@ -1,8 +1,12 @@
 <script>
+  // Import necessary Svelte functions and transitions
   import { createEventDispatcher, onMount, onDestroy } from 'svelte';
   import { fade, scale } from 'svelte/transition';
   import Electron from './Electron.svelte';
+
+  // Define the element data passed into the component
   export let element;
+  // Create a dispatcher to emit custom events
   const dispatch = createEventDispatcher();
 
   // Modal open/close
@@ -10,10 +14,14 @@
     dispatch('close');
   }
   function handleKeydown(event) {
+    // Close modal on Escape key press
     if (event.key === 'Escape') close();
   }
+  // Add event listener for keydown when the component mounts
   onMount(() => window.addEventListener('keydown', handleKeydown));
+  // Remove event listener for keydown when the component unmounts
   onDestroy(() => window.removeEventListener('keydown', handleKeydown));
+
 
   // Animation state
   let time = 0;
@@ -22,6 +30,7 @@
     time += 0.016; // ~60fps
     animationFrame = requestAnimationFrame(animate);
   }
+  // Start the animation loop when the component mounts and clean up when unmounting
   onMount(() => {
     animationFrame = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animationFrame);
@@ -30,20 +39,24 @@
 
   // SVG layout
   let size = 350; // SVG width/height
+  // Define min/max size for resizing
   const minSize = 250, maxSize = 600;
+  // Helper function to get the center coordinates
   const center = () => size / 2;
+  // Define radii and spacing for the Bohr model
   const nucleusRadius = 18;
   const shellGap = 32;
   const electronRadius = 6;
+  // Reactive declaration for electron shells array
   $: shells = Array.isArray(element.shells) ? element.shells : [];
   $: maxShells = shells.length;
+  // Define colors for the visualization
   const shellColor = '#bbb';
   const electronColor = '#007bff';
   const nucleusColor = '#e74c3c';
 
   // Parse electron configuration for quantum view
   function parseConfig(config) {
-    // Accepts e.g. "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6" or "1s² 2s² 2p⁶"
     if (!config) return [];
     // Replace unicode superscripts with normal numbers
     config = config.replace(/([spdfg])([\u2070-\u2079]+)/g, (m, l, n) => l + n.replace(/[\u2070-\u2079]/g, c => '⁰¹²³⁴⁵⁶⁷⁸⁹'.indexOf(c)));
@@ -55,6 +68,7 @@
       label: m[0]
     }));
   }
+  // Reactive declaration for parsed quantum orbitals
   $: quantumOrbitals = parseConfig(element.electron_configuration_semantic || element.electron_configuration);
 
   // Drag state
@@ -62,6 +76,7 @@
   let dragStart = { x: 0, y: 0 };
   let modalPos = { x: 0, y: 0 };
   let modalRef;
+  // Handle pointer down event on the modal header to start dragging
   function onHeaderPointerDown(e) {
     dragging = true;
     dragStart = {
@@ -71,11 +86,13 @@
     window.addEventListener('pointermove', onPointerMove);
     window.addEventListener('pointerup', onPointerUp);
   }
+  // Handle pointer move event to update modal position while dragging
   function onPointerMove(e) {
     if (!dragging) return;
     modalPos.x = e.clientX - dragStart.x;
     modalPos.y = e.clientY - dragStart.y;
   }
+  // Handle pointer up event to stop dragging and remove event listeners
   function onPointerUp() {
     dragging = false;
     window.removeEventListener('pointermove', onPointerMove);
@@ -85,6 +102,7 @@
   // Resize state
   let resizing = false;
   let resizeStart = { x: 0, size: 0 };
+  // Handle pointer down event on the resize handle to start resizing
   function onResizePointerDown(e) {
     resizing = true;
     resizeStart = { x: e.clientX, size };
@@ -92,11 +110,13 @@
     window.addEventListener('pointerup', onResizeUp);
     e.stopPropagation();
   }
+  // Handle pointer move event to update modal size while resizing
   function onResizeMove(e) {
     if (!resizing) return;
     let newSize = resizeStart.size + (e.clientX - resizeStart.x);
     size = Math.max(minSize, Math.min(maxSize, newSize));
   }
+  // Handle pointer up event to stop resizing and remove event listeners
   function onResizeUp() {
     resizing = false;
     window.removeEventListener('pointermove', onResizeMove);
@@ -104,12 +124,14 @@
   }
 </script>
 
+<!-- Modal backdrop for dimming the background and closing the modal on click -->
 <div class="modal-backdrop" on:click={close} role="dialog" aria-modal="true" aria-labelledby="orbit-modal-title">
   <div
     class="modal-content"
     bind:this={modalRef}
     on:click|stopPropagation
     style="transform: translate({modalPos.x}px, {modalPos.y}px); width: {size}px; max-width: 98vw; min-width: 220px;"
+    <!-- Apply a scale transition when the modal appears/disappears -->
     transition:scale|local={{ duration: 180 }}
   >
     <header class="modal-header" on:pointerdown={onHeaderPointerDown} style="cursor: move;">
@@ -121,9 +143,11 @@
         <div class="orbitals-view-box bohr-view-box">
           <div class="orbitals-view-label">Bohr View</div>
           <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style="max-width: 100%; max-height: 60vh; height: auto; width: auto; display: block; margin: 0 auto;">
-            <!-- Nucleus -->
+            <!-- SVG element for the Bohr model visualization -->
+            <!-- Draw the nucleus circle -->
             <circle cx={center()} cy={center()} r={nucleusRadius} fill={nucleusColor} stroke="#a00" stroke-width="2" />
             <text x={center()} y={center()+5} text-anchor="middle" font-size="1.2em" fill="#fff">{element.symbol}</text>
+            <!-- Loop through each electron shell and draw the shell circle and electrons -->
             <!-- Shells, labels, and electrons -->
             {#each shells as electronCount, shellIdx}
               {#if electronCount > 0}
@@ -135,6 +159,7 @@
                   stroke={shellColor}
                   stroke-width="1.5"
                 />
+                <!-- Draw the shell label (K, L, M, etc.) -->
                 <text
                   x={center()}
                   y={center() - (nucleusRadius + shellGap * (shellIdx + 1) + 18)}
@@ -145,6 +170,7 @@
                 >
                   {['K','L','M','N','O','P','Q'][shellIdx] || shellIdx+1}
                 </text>
+                <!-- Loop through each electron in the shell and render the Electron component -->
                 {#each Array(electronCount) as _, eIdx (shellIdx + '-' + eIdx)}
                   <Electron
                     center={center()}
@@ -161,11 +187,14 @@
               {/if}
             {/each}
           </svg>
+          <!-- Legend for the Bohr model -->
           <div class="legend">
             <span class="nucleus-dot"></span> Nucleus
             <span class="electron-dot"></span> Electron
           </div>
+          <!-- Display electron count per shell -->
           <div class="shells-info">
+            <!-- Loop through shells and display the count -->
             {#each shells as n, i}
               <span>Shell {i+1}: {n} electron{n === 1 ? '' : 's'}</span>{#if i < shells.length-1}, {/if}
             {/each}
@@ -174,9 +203,12 @@
         <div class="orbitals-view-box quantum-view-box">
           <div class="orbitals-view-label">Quantum View</div>
           <div class="quantum-orbitals-visual">
+            <!-- Display quantum orbitals if available -->
             {#if quantumOrbitals.length > 0}
               <div class="orbitals-row">
+                <!-- Loop through each parsed orbital -->
                 {#each quantumOrbitals as orb}
+                  <!-- Render an orbital cell -->
                   <div class="orbital-cell">
                     {#if orb.type === 's'}
                       <svg width="38" height="38" viewBox="0 0 38 38">
@@ -199,6 +231,7 @@
                         <ellipse cx="19" cy="19" rx="3" ry="10" fill="none" stroke="#007bff" stroke-width="2" transform="rotate(120 19 19)" />
                       </svg>
                     {/if}
+                    <!-- Display orbital label and electron count -->
                     <div class="orbital-label">{orb.label}</div>
                     <div class="orbital-electrons">{orb.count}e⁻</div>
                   </div>
@@ -211,10 +244,13 @@
         </div>
       </div>
     </div>
+    <!-- Resize handle element -->
     <div class="resize-handle" on:pointerdown={onResizePointerDown}></div>
   </div>
 </div>
 
+
+<!-- Component styling -->
 <style>
   .modal-backdrop {
     position: fixed;

@@ -1,4 +1,5 @@
 <script>
+  // Import necessary Svelte components and modules
   import PeriodicTable from '$lib/PeriodicTable.svelte';
   import ElementModal from '$lib/ElementModal.svelte';
   import elementsData from '$lib/data/PeriodicTableJSON.json';
@@ -6,27 +7,39 @@
   import FLogo from '$lib/FLogo.svelte';
   import { onMount } from 'svelte';
 
+  // State variables for managing data and UI visibility
+  // allElements: Holds the list of elements from the JSON data
   let allElements = elementsData.elements;
+  // selectedElement: Stores the currently selected element for the Wiki modal
   let selectedElement = null;
+  // showWikiModal: Controls the visibility of the Wiki modal
   let showWikiModal = false;
+  // showOrbitModal: Controls the visibility of the Orbit animation modal
   let showOrbitModal = false;
+  // orbitElement: Stores the element for which the orbit animation is shown
   let orbitElement = null;
 
+  // Handler function to show the Wiki modal
+  // Takes an event detail containing the selected element
   function handleShowWiki(event) {
     selectedElement = event.detail;
     showWikiModal = true;
   }
 
+  // Handler function to show the Orbit animation modal
+  // Takes an event detail containing the selected element
   function handleShowOrbitAnimation(event) {
     orbitElement = event.detail;
     showOrbitModal = true;
   }
 
+  // Function to close the Wiki modal and reset the selected element
   function closeWikiModal() {
     showWikiModal = false;
     selectedElement = null;
   }
 
+  // Function to close the Orbit animation modal and reset the orbit element
   function closeOrbitModal() {
     showOrbitModal = false;
     orbitElement = null;
@@ -43,11 +56,14 @@
     elementMap.set(`${el.xpos}-${el.ypos}`, el);
   });
 
+  // Define the standard dimensions for the periodic table grid
   // Determine table dimensions
   const maxC = 18; // Standard periodic table width
   const maxR = 10; // Standard periodic table height (including lanthanides/actinides)
 
+  // Define version and current year for the footer
   const version = 'v1.0.0';
+  // year: Get the current year
   const year = new Date().getFullYear();
 
   // Sticky header background on scroll
@@ -63,12 +79,15 @@
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
   });
+  // Return a cleanup function to remove the event listener when the component is destroyed
 </script>
 
+<!-- Svelte head component for adding elements to the document head -->
 <svelte:head>
   <title>Modern Periodic Table</title>
   <link rel="stylesheet" href="/global.css">
   <style>
+    /* Basic styling for html and body to ensure full width and prevent horizontal overflow */
     html, body {
       width: 100%;
       min-width: 0;
@@ -79,12 +98,16 @@
 </svelte:head>
 
 <div class="site-bg">
+  <!-- Background grid overlay for visual effect -->
   <div class="grid-overlay"></div>
   <main>
+    <!-- Application header -->
     <header class="app-header" bind:this={headerEl}>
       <div class="header-left">
+        <!-- Feynman Logo component -->
         <FLogo size={60} />
         <h1>Modern Periodic Table</h1>
+        <!-- Application title -->
       </div>
     </header>
     <div class="table-legend-container">
@@ -92,10 +115,15 @@
         <div class="legend-title">Legend</div>
         <div class="legend-large-cell">
           <span class="legend-large-number">Atomic Number</span>
+          <!-- Info button with SVG icon -->
           <button class="legend-large-info" tabindex="-1" aria-label="Info"><svg width="22" height="22" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="9" stroke="#007bff" stroke-width="2" fill="#fff"/><line x1="10" y1="5" x2="10" y2="15" stroke="#007bff" stroke-width="2" /><line x1="5" y1="10" x2="15" y2="10" stroke="#007bff" stroke-width="2" /></svg></button>
+          <!-- Element Symbol label -->
           <span class="legend-large-symbol">Symbol</span>
+          <!-- Element Name label -->
           <span class="legend-large-name">Name</span>
+          <!-- Atomic Weight label -->
           <span class="legend-large-weight">Atomic Weight</span>
+          <!-- Orbitals button label -->
           <button class="legend-large-orbital" tabindex="-1">Orbitals</button>
           <div class="legend-orbital-svg">
             <svg viewBox="0 0 220 60" width="100%" height="48" style="max-width:220px;">
@@ -129,6 +157,7 @@
           </div>
         </div>
       </section>
+      <!-- PeriodicTable component, passing data and event handlers -->
       <PeriodicTable 
         elements={allElements} 
         {maxC} 
@@ -139,11 +168,14 @@
       />
     </div>
     
+    <!-- Conditionally render the ElementModal if showWikiModal is true and selectedElement is not null -->
     {#if showWikiModal && selectedElement}
       <ElementModal element={selectedElement} on:close={closeWikiModal} />
     {/if}
+    <!-- Conditionally render the OrbitAnimationModal if showOrbitModal is true and orbitElement is not null -->
     {#if showOrbitModal && orbitElement}
       <OrbitAnimationModal element={orbitElement} on:close={closeOrbitModal} />
+      <!-- Pass the element data and a close handler -->
     {/if}
   </main>
 
@@ -153,6 +185,7 @@
 </div>
 
 <style>
+  /* Styling for the main site background */
   .site-bg {
     min-height: 100vh;
     width: 100%;
@@ -161,6 +194,7 @@
     overflow-x: hidden;
     box-sizing: border-box;
   }
+  /* Styling for the grid overlay effect */
   .grid-overlay {
     pointer-events: none;
     position: fixed;
@@ -175,6 +209,7 @@
     background-size: 40px 40px;
     opacity: 0.7;
   }
+  /* Styling for the main content area */
   main {
     font-family: Arial, sans-serif;
     text-align: center;
@@ -184,6 +219,7 @@
     overflow-x: auto;
     box-sizing: border-box;
   }
+  /* Styling for the sticky header */
   .app-header {
     position: sticky;
     top: 0;
@@ -201,18 +237,21 @@
     padding: 0.5em 1em;
     border-bottom: none;
     transition: background 0.3s;
+    /* Smooth transition for background color */
   }
   .app-header.scrolled {
+    /* Background color when the page is scrolled */
     background: #111;
   }
+  /* Styling for the left side of the header */
   .header-left {
     display: flex;
     align-items: center;
     min-width: 40px;
     gap: 1.2em;
   }
+  /* Styling for the header title */
   .app-header h1 {
-    color: #fff;
     margin-bottom: 0;
     font-size: 2em;
     font-weight: 700;
@@ -220,6 +259,7 @@
     text-align: left;
     white-space: nowrap;
   }
+  /* Styling for the legend box */
   .legend-box {
     background: transparent;
     color: var(--text);
@@ -231,6 +271,7 @@
     box-shadow: none;
     text-align: left;
     position: relative;
+    /* Position relative for positioning the legend cell inside */
   }
   .legend-title {
     font-weight: bold;
@@ -239,6 +280,7 @@
     text-align: center;
     color: #fff;
   }
+  /* Styling for the large legend cell example */
   .legend-large-cell {
     position: relative;
     display: flex;
@@ -257,6 +299,7 @@
     z-index: 2;
     padding-bottom: 1.2em;
   }
+  /* Styling for the atomic number in the legend cell */
   .legend-large-number {
     position: absolute;
     top: 12px;
@@ -271,6 +314,7 @@
     box-shadow: 0 1px 2px rgba(0,0,0,0.04);
     text-align: left;
   }
+  /* Styling for the info button in the legend cell */
   .legend-large-info {
     position: absolute;
     top: 12px;
@@ -287,6 +331,7 @@
     box-shadow: 0 1px 2px rgba(0,0,0,0.04);
   }
   .legend-large-symbol {
+    /* Styling for the element symbol in the legend cell */
     font-weight: bold;
     font-size: 1.5em;
     color: #007bff;
@@ -295,6 +340,7 @@
     z-index: 2;
     letter-spacing: 0.01em;
   }
+  /* Styling for the element name in the legend cell */
   .legend-large-name {
     font-size: 1.1em;
     color: #333;
@@ -305,6 +351,7 @@
     z-index: 2;
     box-shadow: 0 1px 2px rgba(0,0,0,0.04);
   }
+  /* Styling for the atomic weight in the legend cell */
   .legend-large-weight {
     font-size: 1.1em;
     color: #333;
@@ -315,6 +362,7 @@
     z-index: 2;
     box-shadow: 0 1px 2px rgba(0,0,0,0.04);
   }
+  /* Styling for the orbitals button in the legend cell */
   .legend-large-orbital {
     font-size: 1em;
     color: #007bff;
@@ -329,6 +377,7 @@
     cursor: pointer;
     box-shadow: 0 1px 2px rgba(0,0,0,0.04);
   }
+  /* Container for the orbital SVG in the legend */
   .legend-orbital-svg {
     margin-top: 0.7em;
     width: 100%;
@@ -336,6 +385,7 @@
     justify-content: center;
     align-items: center;
   }
+  /* Styling for the SVG inside the orbital container */
   .legend-orbital-svg-inside {
     position: absolute;
     left: 0;
@@ -348,6 +398,7 @@
     align-items: flex-end;
     pointer-events: none;
   }
+  /* Media query for smaller screens (max-width 600px) */
   @media (max-width: 600px) {
     .legend-box {
       max-width: 98vw;
@@ -367,6 +418,7 @@
       padding: 0.5em 0.5em;
     }
     .footer-left {
+      /* Adjust gap in footer for smaller screens */
       gap: 0.5em;
     }
   }
@@ -390,10 +442,12 @@
     gap: 1.5em;
     box-sizing: border-box;
   }
+  /* Styling for the left side of the footer */
   .footer-left {
     display: flex;
     align-items: center;
     gap: 1.2em;
+    /* Space between footer items */
   }
   .footer-copyright {
     margin-left: 0.7em;
@@ -401,6 +455,7 @@
     color: #fff;
   }
   .footer-version {
+    /* Styling for the version information in the footer */
     margin-left: 1.2em;
     color: #bbd4f6;
     font-size: 0.98em;
@@ -414,6 +469,7 @@
     border: none !important;
     box-shadow: none !important;
   }
+  /* Container for the periodic table and the floating legend */
   .table-legend-container {
     position: relative;
     width: 100%;
@@ -423,6 +479,7 @@
     align-items: stretch;
     justify-content: flex-start;
   }
+  /* Styling for the legend when it's floating (desktop view) */
   .legend-floating {
     position: absolute;
     left: 50%;
@@ -430,6 +487,7 @@
     transform: translateX(-50%);
     z-index: 10;
   }
+  /* Media query to make the legend static on smaller screens */
   @media (max-width: 900px) {
     .legend-floating {
       position: static;
@@ -439,6 +497,7 @@
       margin: 0 auto 0.5em auto;
       display: block;
     }
+    /* Reset min-height for the container on smaller screens */
     .table-legend-container {
       min-height: 0;
     }

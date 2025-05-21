@@ -1,30 +1,41 @@
 <script>
+  // Import necessary Svelte functions
   import { createEventDispatcher, onMount, onDestroy } from 'svelte';
 
+  // Export a prop `element` which is expected to contain the element data to display.
   export let element;
+  // Create a dispatcher to send custom events from this component.
   const dispatch = createEventDispatcher();
 
+  // Function to close the modal. It dispatches a custom 'close' event.
   function close() {
     dispatch('close');
   }
 
+  // Function to handle keyboard events. Specifically listens for the 'Escape' key to close the modal.
   function handleKeydown(event) {
     if (event.key === 'Escape') {
       close();
     }
   }
 
+  // Lifecycle function that runs after the component is first rendered to the DOM.
+  // It adds a global keydown event listener to the window.
   onMount(() => {
     window.addEventListener('keydown', handleKeydown);
   });
 
+  // Lifecycle function that runs before the component is destroyed.
+  // It removes the global keydown event listener to prevent memory leaks.
   onDestroy(() => {
     window.removeEventListener('keydown', handleKeydown);
   });
 
+  // Define inline style for the iframe. This could potentially be dynamic later.
   let iframeStyle = "width: 100%; height: 100%; border: none;";
 </script>
 
+<!-- The modal backdrop creates a dark overlay behind the modal content and handles closing the modal when clicked outside the content. -->
 <div class="modal-backdrop" on:click={close} role="dialog" aria-modal="true" aria-labelledby="modal-title">
   <div class="modal-content" on:click|stopPropagation>
     <header class="modal-header">
