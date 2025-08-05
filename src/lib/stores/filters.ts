@@ -108,39 +108,13 @@ export const filterSummary = derived(
   }
 );
 
-// Derived store for quick filter presets
+// Import filter presets
+import { filterPresetsStore } from './filterPresets';
+
+// Derived store for quick filter presets (default presets only)
 export const filterPresets = derived(
-  filterStore,
-  () => [
-    {
-      name: 'Noble Gases',
-      filters: { categories: ['noble gas'] }
-    },
-    {
-      name: 'Metals',
-      filters: { categories: ['alkali metal', 'alkaline earth metal', 'transition metal', 'post-transition metal'] }
-    },
-    {
-      name: 'Nonmetals',
-      filters: { categories: ['nonmetal', 'halogen'] }
-    },
-    {
-      name: 'Period 1',
-      filters: { periods: [1] }
-    },
-    {
-      name: 'Period 2',
-      filters: { periods: [2] }
-    },
-    {
-      name: 'Lanthanides',
-      filters: { categories: ['lanthanide'] }
-    },
-    {
-      name: 'Actinides',
-      filters: { categories: ['actinide'] }
-    }
-  ]
+  filterPresetsStore,
+  $presets => $presets.filter(preset => preset.isDefault).slice(0, 8) // Show first 8 default presets
 );
 
 // Actions for managing filters

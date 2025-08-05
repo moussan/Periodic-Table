@@ -3,6 +3,7 @@
   import PeriodicTable from '$lib/PeriodicTable.svelte';
   import ElementModal from '$lib/ElementModal.svelte';
   import SearchPanel from '$lib/components/SearchPanel.svelte';
+  import FilterPanel from '$lib/components/FilterPanel.svelte';
   import elementsData from '$lib/data/PeriodicTableJSON.json';
   import OrbitAnimationModal from '$lib/OrbitAnimationModal.svelte';
   import FLogo from '$lib/FLogo.svelte';
@@ -71,6 +72,22 @@
   function handleFiltersReset() {
     console.log('Filters reset');
     // The reset is already handled by the stores
+  }
+
+  // Filter panel event handlers
+  function handleFilterChange(event) {
+    console.log('Filter changed:', event.detail);
+    // The filter changes are already handled by the stores
+  }
+
+  function handlePresetApply(event) {
+    console.log('Preset applied:', event.detail);
+    // The preset application is already handled by the stores
+  }
+
+  function handleFilterToggle(event) {
+    console.log('Filter panel toggled:', event.detail);
+    // Just for debugging, no additional action needed
   }
 
   // Ensure all elements have xpos and ypos, and they are numbers
@@ -221,6 +238,15 @@
           on:clear={handleSearchClear}
           on:reset={handleFiltersReset}
         />
+        
+        <div class="filter-section-wrapper">
+          <FilterPanel 
+            on:filterChange={handleFilterChange}
+            on:reset={handleFiltersReset}
+            on:presetApply={handlePresetApply}
+            on:toggle={handleFilterToggle}
+          />
+        </div>
       </section>
 
       <!-- Enhanced periodic table container -->
@@ -646,8 +672,15 @@
   /* Search section */
   .search-section {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-lg);
     margin-bottom: var(--space-xl);
+  }
+
+  .filter-section-wrapper {
+    width: 100%;
+    max-width: 1200px;
   }
 
   /* Table container */
