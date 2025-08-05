@@ -2,47 +2,75 @@
   // Import necessary Svelte components and modules
   import PeriodicTable from '$lib/PeriodicTable.svelte';
   import ElementModal from '$lib/ElementModal.svelte';
+  import SearchPanel from '$lib/components/SearchPanel.svelte';
   import elementsData from '$lib/data/PeriodicTableJSON.json';
-  import { OrbitAnimationModal } from '$lib/OrbitAnimationModal.svelte';
+  import OrbitAnimationModal from '$lib/OrbitAnimationModal.svelte';
   import FLogo from '$lib/FLogo.svelte';
   import { onMount } from 'svelte';
+  import { initializeAPI, getAPIStatus } from '$lib/api';
+  import { 
+    initializeStores, 
+    elementsStore, 
+    filteredElementsStore,
+    selectedElementsStore,
+    userPreferencesStore,
+    appStateStore,
+    setActiveModal,
+    closeModal
+  } from '$lib/stores';
+  import '../app.css';
 
   // State variables for managing data and UI visibility
-  // allElements: Holds the list of elements from the JSON data
-  let allElements = elementsData.elements;
-  // selectedElement: Stores the currently selected element for the Wiki modal
+  // Use stores for state management
   let selectedElement = null;
-  // showWikiModal: Controls the visibility of the Wiki modal
-  let showWikiModal = false;
-  // showOrbitModal: Controls the visibility of the Orbit animation modal
-  let showOrbitModal = false;
-  // orbitElement: Stores the element for which the orbit animation is shown
   let orbitElement = null;
+  
+  // Reactive statements for store subscriptions
+  $: allElements = $elementsStore.length > 0 ? $elementsStore : elementsData.elements;
+  $: filteredElements = $filteredElementsStore.length > 0 ? $filteredElementsStore : allElements;
+  $: showWikiModal = $appStateStore.activeModal === 'element-modal';
+  $: showOrbitModal = $appStateStore.activeModal === 'orbit-modal';
 
   // Handler function to show the Wiki modal
   // Takes an event detail containing the selected element
   function handleShowWiki(event) {
     selectedElement = event.detail;
-    showWikiModal = true;
+    setActiveModal('element-modal');
   }
 
   // Handler function to show the Orbit animation modal
   // Takes an event detail containing the selected element
   function handleShowOrbitAnimation(event) {
     orbitElement = event.detail;
-    showOrbitModal = true;
+    setActiveModal('orbit-modal');
   }
 
   // Function to close the Wiki modal and reset the selected element
   function closeWikiModal() {
-    showWikiModal = false;
+    closeModal();
     selectedElement = null;
   }
 
   // Function to close the Orbit animation modal and reset the orbit element
   function closeOrbitModal() {
-    showOrbitModal = false;
+    closeModal();
     orbitElement = null;
+  }
+
+  // Search event handlers
+  function handleSearch(event) {
+    console.log('Search performed:', event.detail);
+    // The search is already handled by the stores, just log for debugging
+  }
+
+  function handleSearchClear() {
+    console.log('Search cleared');
+    // The clear is already handled by the stores
+  }
+
+  function handleFiltersReset() {
+    console.log('Filters reset');
+    // The reset is already handled by the stores
   }
 
   // Ensure all elements have xpos and ypos, and they are numbers
@@ -66,9 +94,29 @@
   // year: Get the current year
   const year = new Date().getFullYear();
 
+  // API status tracking
+  let apiStatus = null;
+
   // Sticky header background on scroll
   let headerEl;
-  onMount(() => {
+  onMount(async () => {
+    // Initialize stores first
+    try {
+      await initializeStores();
+      console.log('Stores initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize stores:', error);
+    }
+
+    // Initialize API layer
+    try {
+      await initializeAPI();
+      apiStatus = getAPIStatus();
+      console.log('API initialized:', apiStatus);
+    } catch (error) {
+      console.error('Failed to initialize API:', error);
+    }
+
     const onScroll = () => {
       if (window.scrollY > 10) {
         headerEl.classList.add('scrolled');
@@ -79,93 +127,114 @@
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
   });
-  // Return a cleanup function to remove the event listener when the component is destroyed
 </script>
 
 <!-- Svelte head component for adding elements to the document head -->
 <svelte:head>
-  <title>Modern Periodic Table</title>
+  <title>Advanced Periodic Table - Interactive Chemistry Explorer</title>
+  <meta name="description" content="Explore the periodic table with advanced visualizations, quantum orbital animations, and comprehensive element data." />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="/global.css">
-  <style>
-    /* Basic styling for html and body to ensure full width and prevent horizontal overflow */
-    html, body {
-      width: 100%;
-      min-width: 0;
-      box-sizing: border-box;
-      overflow-x: hidden;
-    }
-  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </svelte:head>
 
-<div class="site-bg">
-  <!-- Background grid overlay for visual effect -->
-  <div class="grid-overlay"></div>
-  <main>
-    <!-- Application header -->
-    <header class="app-header" bind:this={headerEl}>
-      <div class="header-left">
-        <!-- Feynman Logo component -->
-        <FLogo size={60} />
-        <h1>Modern Periodic Table</h1>
-        <!-- Application title -->
+<div class="site-container">
+  <!-- Animated background with particles and grid -->
+  <div class="background-layers">
+    <div class="gradient-bg"></div>
+    <div class="grid-overlay"></div>
+    <div class="particle-field"></div>
+  </div>
+  
+  <main class="main-content">
+    <!-- Modern application header with glass morphism -->
+    <header class="app-header glass" bind:this={headerEl}>
+      <div class="header-content">
+        <div class="header-left">
+          <div class="logo-container">
+            <FLogo size={48} />
+          </div>
+          <div class="header-text">
+            <h1 class="header-title text-gradient">Advanced Periodic Table</h1>
+            <p class="header-subtitle">Interactive Chemistry Explorer</p>
+          </div>
+        </div>
+        <div class="header-right">
+          <div class="header-stats">
+            <div class="stat-item">
+              <span class="stat-number">118</span>
+              <span class="stat-label">Elements</span>
+            </div>
+          </div>
+        </div>
       </div>
     </header>
-    <div class="table-legend-container">
-      <section class="legend-box legend-floating">
-        <div class="legend-title">Legend</div>
-        <div class="legend-large-cell">
-          <span class="legend-large-number">Atomic Number</span>
-          <!-- Info button with SVG icon -->
-          <button class="legend-large-info" tabindex="-1" aria-label="Info"><svg width="22" height="22" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="9" stroke="#007bff" stroke-width="2" fill="#fff"/><line x1="10" y1="5" x2="10" y2="15" stroke="#007bff" stroke-width="2" /><line x1="5" y1="10" x2="15" y2="10" stroke="#007bff" stroke-width="2" /></svg></button>
-          <!-- Element Symbol label -->
-          <span class="legend-large-symbol">Symbol</span>
-          <!-- Element Name label -->
-          <span class="legend-large-name">Name</span>
-          <!-- Atomic Weight label -->
-          <span class="legend-large-weight">Atomic Weight</span>
-          <!-- Orbitals button label -->
-          <button class="legend-large-orbital" tabindex="-1">Orbitals</button>
-          <div class="legend-orbital-svg">
-            <svg viewBox="0 0 220 60" width="100%" height="48" style="max-width:220px;">
-              <!-- s orbital -->
-              <g>
-                <circle cx="25" cy="30" r="16" fill="#bbd4f6" stroke="#007bff" stroke-width="2" />
-                <text x="25" y="55" text-anchor="middle" font-size="18" fill="#007bff">s</text>
-              </g>
-              <!-- p orbital -->
-              <g>
-                <ellipse cx="75" cy="30" rx="8" ry="18" fill="#bbd4f6" stroke="#007bff" stroke-width="2" />
-                <ellipse cx="95" cy="30" rx="8" ry="18" fill="#bbd4f6" stroke="#007bff" stroke-width="2" />
-                <text x="85" y="55" text-anchor="middle" font-size="18" fill="#007bff">p</text>
-              </g>
-              <!-- d orbital -->
-              <g>
-                <ellipse cx="135" cy="20" rx="6" ry="14" fill="none" stroke="#007bff" stroke-width="2" transform="rotate(45 135 30)" />
-                <ellipse cx="135" cy="40" rx="6" ry="14" fill="none" stroke="#007bff" stroke-width="2" transform="rotate(-45 135 30)" />
-                <ellipse cx="155" cy="30" rx="6" ry="14" fill="none" stroke="#007bff" stroke-width="2" transform="rotate(45 155 30)" />
-                <ellipse cx="155" cy="30" rx="6" ry="14" fill="none" stroke="#007bff" stroke-width="2" transform="rotate(-45 155 30)" />
-                <text x="145" y="55" text-anchor="middle" font-size="18" fill="#007bff">d</text>
-              </g>
-              <!-- f orbital (abstract, 6 lobes) -->
-              <g>
-                <ellipse cx="195" cy="30" rx="5" ry="13" fill="none" stroke="#007bff" stroke-width="2" transform="rotate(0 195 30)" />
-                <ellipse cx="195" cy="30" rx="5" ry="13" fill="none" stroke="#007bff" stroke-width="2" transform="rotate(60 195 30)" />
-                <ellipse cx="195" cy="30" rx="5" ry="13" fill="none" stroke="#007bff" stroke-width="2" transform="rotate(120 195 30)" />
-                <text x="195" y="55" text-anchor="middle" font-size="18" fill="#007bff">f</text>
-              </g>
-            </svg>
+    <!-- Main content area with enhanced layout -->
+    <div class="content-wrapper">
+      <!-- Interactive legend with modern design -->
+      <section class="legend-section glass-subtle">
+        <div class="legend-header">
+          <h2 class="legend-title">Element Guide</h2>
+          <p class="legend-description">Understanding the periodic table layout</p>
+        </div>
+        <div class="legend-content">
+          <div class="legend-cell-demo glass">
+            <span class="demo-number">1</span>
+            <button class="demo-info" aria-label="Element information">
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="2" fill="none"/>
+                <path d="M9 9h2v6h-2V9zm0-4h2v2H9V5z" fill="currentColor"/>
+              </svg>
+            </button>
+            <span class="demo-symbol">H</span>
+            <span class="demo-name">Hydrogen</span>
+            <span class="demo-weight">1.008</span>
+            <button class="demo-orbital">Orbitals</button>
+          </div>
+          <div class="orbital-types">
+            <div class="orbital-type">
+              <div class="orbital-visual s-orbital"></div>
+              <span class="orbital-label">s</span>
+            </div>
+            <div class="orbital-type">
+              <div class="orbital-visual p-orbital"></div>
+              <span class="orbital-label">p</span>
+            </div>
+            <div class="orbital-type">
+              <div class="orbital-visual d-orbital"></div>
+              <span class="orbital-label">d</span>
+            </div>
+            <div class="orbital-type">
+              <div class="orbital-visual f-orbital"></div>
+              <span class="orbital-label">f</span>
+            </div>
           </div>
         </div>
       </section>
-      <!-- PeriodicTable component, passing data and event handlers -->
-      <PeriodicTable 
-        elements={allElements} 
-        {maxC} 
-        {maxR} 
-        {elementMap} 
-        on:showWiki={handleShowWiki}
-        on:showOrbitAnimation={handleShowOrbitAnimation}
-      />
+
+      <!-- Advanced search and filtering panel -->
+      <section class="search-section">
+        <SearchPanel 
+          on:search={handleSearch}
+          on:clear={handleSearchClear}
+          on:reset={handleFiltersReset}
+        />
+      </section>
+
+      <!-- Enhanced periodic table container -->
+      <div class="table-container">
+        <PeriodicTable 
+          elements={filteredElements} 
+          allElements={allElements}
+          {maxC} 
+          {maxR} 
+          {elementMap} 
+          on:showWiki={handleShowWiki}
+          on:showOrbitAnimation={handleShowOrbitAnimation}
+        />
+      </div>
     </div>
     
     <!-- Conditionally render the ElementModal if showWikiModal is true and selectedElement is not null -->
@@ -179,303 +248,581 @@
     {/if}
   </main>
 
-  <footer class="app-footer">
-    <div class="footer-left"><FLogo size={32} /><span class="footer-copyright">&copy; Moussa El Najmi</span><span class="footer-version">{year} · {version}</span></div>
-  </footer>
+    <!-- Modern footer with glass morphism -->
+    <footer class="app-footer glass-subtle">
+      <div class="footer-content">
+        <div class="footer-left">
+          <div class="footer-logo">
+            <FLogo size={28} />
+          </div>
+          <div class="footer-info">
+            <span class="footer-copyright">&copy; {year} Moussa El Najmi</span>
+            <span class="footer-version">{version}</span>
+          </div>
+        </div>
+        <div class="footer-right">
+          <div class="footer-links">
+            <span class="footer-link">Advanced Chemistry Explorer</span>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </main>
 </div>
 
 <style>
-  /* Styling for the main site background */
-  .site-bg {
+  /* Main site container with modern dark theme */
+  .site-container {
     min-height: 100vh;
     width: 100%;
     position: relative;
-    background: linear-gradient(to bottom, #0a2342 0%, #193a6a 100%);
     overflow-x: hidden;
     box-sizing: border-box;
   }
-  /* Styling for the grid overlay effect */
-  .grid-overlay {
-    pointer-events: none;
+
+  /* Layered background system */
+  .background-layers {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: 0;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .gradient-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at top, hsl(var(--primary)) 0%, hsl(var(--background)) 50%),
+                linear-gradient(135deg, hsl(var(--background)) 0%, hsl(217.2 32.6% 12%) 100%);
+  }
+
+  .grid-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     background-image:
-      repeating-linear-gradient(to right, rgba(255,255,255,0.04) 0, rgba(255,255,255,0.04) 1px, transparent 1px, transparent 40px),
-      repeating-linear-gradient(to bottom, rgba(255,255,255,0.04) 0, rgba(255,255,255,0.04) 1px, transparent 1px, transparent 40px);
-    background-size: 40px 40px;
-    opacity: 0.7;
+      repeating-linear-gradient(to right, rgba(255,255,255,0.03) 0, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 60px),
+      repeating-linear-gradient(to bottom, rgba(255,255,255,0.03) 0, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 60px);
+    background-size: 60px 60px;
+    opacity: 0.5;
   }
-  /* Styling for the main content area */
-  main {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    padding: 1em;
-    max-width: 100vw;
-    margin: 0 auto;
-    overflow-x: auto;
-    box-sizing: border-box;
+
+  .particle-field {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+      radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.1), transparent),
+      radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.05), transparent),
+      radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.08), transparent),
+      radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.03), transparent);
+    background-repeat: repeat;
+    background-size: 200px 100px;
+    animation: float 20s ease-in-out infinite;
   }
-  /* Styling for the sticky header */
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    33% { transform: translateY(-10px) rotate(1deg); }
+    66% { transform: translateY(5px) rotate(-1deg); }
+  }
+
+  /* Main content area */
+  .main-content {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  /* Modern header with glass morphism */
   .app-header {
     position: sticky;
     top: 0;
     z-index: 100;
-    background: transparent;
-    width: 100%;
-    left: 0;
-    right: 0;
+    margin-bottom: var(--space-xl);
+    border-radius: 0 0 var(--radius) var(--radius);
+    transition: all var(--transition-normal);
+  }
+
+  .app-header.scrolled {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .header-content {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    margin-bottom: 1.5em;
-    gap: 0;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-    padding: 0.5em 1em;
-    border-bottom: none;
-    transition: background 0.3s;
-    /* Smooth transition for background color */
+    justify-content: space-between;
+    padding: var(--space-lg) var(--space-xl);
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
   }
-  /* Styling for the header title */
-  .app-header h1 {
-    margin-bottom: 0;
-    font-size: 2em;
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+  }
+
+  .logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-sm);
+    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .header-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-xs);
+  }
+
+  .header-title {
+    font-size: var(--font-size-3xl);
     font-weight: 700;
-    letter-spacing: 0.01em;
-    text-align: left;
-    white-space: nowrap;
-  }
-  /* Styling for the legend box */
-  .legend-box {
-    background: transparent;
-    color: var(--text);
-    border: none;
-    border-radius: 12px;
     margin: 0;
-    max-width: 98vw;
-    padding: 1.2em 1.2em 1.2em 1.2em;
-    box-shadow: none;
-    text-align: left;
-    position: relative;
-    /* Position relative for positioning the legend cell inside */
+    letter-spacing: -0.025em;
+    line-height: 1.2;
   }
-  .legend-title {
-    font-weight: bold;
-    font-size: 1.1em;
-    margin-bottom: 0.7em;
+
+  .header-subtitle {
+    font-size: var(--font-size-base);
+    color: hsl(var(--muted-foreground));
+    margin: 0;
+    font-weight: 400;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+  }
+
+  .header-stats {
+    display: flex;
+    gap: var(--space-lg);
+  }
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .stat-number {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: hsl(var(--primary));
+  }
+
+  .stat-label {
+    font-size: var(--font-size-sm);
+    color: hsl(var(--muted-foreground));
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Content wrapper */
+  .content-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xl);
+    padding: 0 var(--space-xl);
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  /* Enhanced legend section */
+  .legend-section {
+    border-radius: var(--radius);
+    padding: var(--space-xl);
+    margin-bottom: var(--space-lg);
+  }
+
+  .legend-header {
     text-align: center;
-    color: #fff;
+    margin-bottom: var(--space-xl);
   }
-  /* Styling for the large legend cell example */
-  .legend-large-cell {
+
+  .legend-title {
+    font-size: var(--font-size-2xl);
+    font-weight: 600;
+    margin: 0 0 var(--space-sm) 0;
+    color: hsl(var(--foreground));
+  }
+
+  .legend-description {
+    font-size: var(--font-size-base);
+    color: hsl(var(--muted-foreground));
+    margin: 0;
+  }
+
+  .legend-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xl);
+  }
+
+  /* Modern legend cell demo */
+  .legend-cell-demo {
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    width: 200px;
-    height: 260px;
-    margin: 0 auto;
-    max-width: 98vw;
-    background: #f0f0f0;
-    border: 2.5px solid #bbb;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-    font-family: inherit;
-    z-index: 2;
-    padding-bottom: 1.2em;
+    width: 180px;
+    height: 220px;
+    border-radius: var(--radius);
+    padding: var(--space-md);
+    transition: all var(--transition-normal);
   }
-  /* Styling for the atomic number in the legend cell */
-  .legend-large-number {
+
+  .legend-cell-demo:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  }
+
+  .demo-number {
     position: absolute;
-    top: 12px;
-    left: 14px;
-    font-weight: bold;
-    font-size: 0.85em;
-    background: #e0e0e0;
-    color: #333;
-    border-radius: 3px;
-    padding: 0.1em 0.6em;
-    z-index: 2;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-    text-align: left;
+    top: var(--space-sm);
+    left: var(--space-sm);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.1);
+    color: hsl(var(--foreground));
+    border-radius: calc(var(--radius) / 2);
+    padding: var(--space-xs) var(--space-sm);
   }
-  /* Styling for the info button in the legend cell */
-  .legend-large-info {
+
+  .demo-info {
     position: absolute;
-    top: 12px;
-    right: 14px;
-    background: #fffbe7;
-    border-radius: 50%;
-    padding: 0.1em 0.3em;
-    color: #007bff;
-    border: 1px solid #eee;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-  }
-  .legend-large-symbol {
-    /* Styling for the element symbol in the legend cell */
-    font-weight: bold;
-    font-size: 1.5em;
-    color: #007bff;
-    margin-top: 38px;
-    margin-bottom: 0.1em;
-    z-index: 2;
-    letter-spacing: 0.01em;
-  }
-  /* Styling for the element name in the legend cell */
-  .legend-large-name {
-    font-size: 1.1em;
-    color: #333;
-    background: #f7f7f7;
-    border-radius: 3px;
-    padding: 0.1em 0.7em;
-    margin-bottom: 0.2em;
-    z-index: 2;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-  }
-  /* Styling for the atomic weight in the legend cell */
-  .legend-large-weight {
-    font-size: 1.1em;
-    color: #333;
-    background: #f7f7f7;
-    border-radius: 3px;
-    padding: 0.1em 0.7em;
-    margin-bottom: 0.2em;
-    z-index: 2;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-  }
-  /* Styling for the orbitals button in the legend cell */
-  .legend-large-orbital {
-    font-size: 1em;
-    color: #007bff;
-    background: #eaf2ff;
-    border-radius: 3px;
-    padding: 0.1em 0.7em;
-    font-family: 'Fira Mono', 'Consolas', monospace;
-    margin-top: 0.2em;
-    z-index: 2;
+    top: var(--space-sm);
+    right: var(--space-sm);
+    background: rgba(255, 255, 255, 0.1);
     border: none;
-    outline: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: hsl(var(--primary));
     cursor: pointer;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    transition: all var(--transition-fast);
   }
-  /* Container for the orbital SVG in the legend */
-  .legend-orbital-svg {
-    margin-top: 0.7em;
-    width: 100%;
+
+  .demo-info:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+  }
+
+  .demo-symbol {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: hsl(var(--primary));
+    margin-top: var(--space-xl);
+    margin-bottom: var(--space-sm);
+  }
+
+  .demo-name {
+    font-size: var(--font-size-base);
+    color: hsl(var(--foreground));
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: calc(var(--radius) / 2);
+    padding: var(--space-xs) var(--space-sm);
+    margin-bottom: var(--space-xs);
+  }
+
+  .demo-weight {
+    font-size: var(--font-size-sm);
+    color: hsl(var(--muted-foreground));
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: calc(var(--radius) / 2);
+    padding: var(--space-xs) var(--space-sm);
+    margin-bottom: var(--space-sm);
+  }
+
+  .demo-orbital {
+    font-size: var(--font-size-sm);
+    color: hsl(var(--primary));
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: calc(var(--radius) / 2);
+    padding: var(--space-xs) var(--space-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .demo-orbital:hover {
+    background: rgba(59, 130, 246, 0.2);
+    transform: scale(1.05);
+  }
+
+  /* Orbital types visualization */
+  .orbital-types {
+    display: flex;
+    gap: var(--space-lg);
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .orbital-type {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  .orbital-visual {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid hsl(var(--primary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: all var(--transition-fast);
+  }
+
+  .orbital-visual:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+
+  .s-orbital {
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%);
+  }
+
+  .p-orbital {
+    background: linear-gradient(45deg, rgba(59, 130, 246, 0.2) 0%, transparent 50%, rgba(59, 130, 246, 0.2) 100%);
+    border-radius: 20px;
+  }
+
+  .d-orbital {
+    background: conic-gradient(from 0deg, rgba(59, 130, 246, 0.2) 0deg, transparent 90deg, rgba(59, 130, 246, 0.2) 180deg, transparent 270deg);
+    border-radius: 20%;
+  }
+
+  .f-orbital {
+    background: radial-gradient(ellipse, rgba(59, 130, 246, 0.2) 0%, transparent 40%);
+    border-radius: 30%;
+  }
+
+  .orbital-label {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: hsl(var(--primary));
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* Search section */
+  .search-section {
     display: flex;
     justify-content: center;
-    align-items: center;
+    margin-bottom: var(--space-xl);
   }
-  /* Media query for smaller screens (max-width 600px) */
-  @media (max-width: 600px) {
-    .legend-box {
-      max-width: 98vw;
-      padding: 0.5em 0.2em 0.5em 0.2em;
-    }
-    .legend-large-cell {
-      width: 98vw;
-      max-width: 98vw;
-      min-width: 0;
-      min-height: 120px;
-      height: 120px;
-    }
-    .app-header h1 {
-      font-size: 1.1em;
-    }
-    .app-header {
-      padding: 0.5em 0.5em;
-    }
-    .footer-left {
-      /* Adjust gap in footer for smaller screens */
-      gap: 0.5em;
-    }
+
+  /* Table container */
+  .table-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: var(--space-lg) 0;
   }
+
+  /* Modern footer */
   .app-footer {
-    position: static;
-    width: 100%;
-    left: 0;
-    right: 0;
-    margin: 2em 0 0 0;
-    background: transparent;
-    color: var(--text);
+    margin-top: var(--space-2xl);
+    border-radius: var(--radius) var(--radius) 0 0;
+  }
+
+  .footer-content {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    padding: 0.5em 1.2em;
-    border-top: none;
-    box-shadow: 0 -2px 8px rgba(0,0,0,0.07);
-    z-index: 100;
-    font-size: 1em;
-    min-height: 48px;
-    gap: 1.5em;
-    box-sizing: border-box;
+    justify-content: space-between;
+    padding: var(--space-lg) var(--space-xl);
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
   }
-  /* Styling for the left side of the footer */
+
   .footer-left {
     display: flex;
     align-items: center;
-    gap: 1.2em;
-    /* Space between footer items */
+    gap: var(--space-lg);
   }
+
+  .footer-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-xs);
+    border-radius: calc(var(--radius) / 2);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .footer-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
   .footer-copyright {
-    margin-left: 0.7em;
+    font-size: var(--font-size-sm);
+    color: hsl(var(--foreground));
     font-weight: 500;
-    color: #fff;
   }
+
   .footer-version {
-    /* Styling for the version information in the footer */
-    margin-left: 1.2em;
-    color: #bbd4f6;
-    font-size: 0.98em;
+    font-size: var(--font-size-xs);
+    color: hsl(var(--muted-foreground));
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
-  /* Table border removal */
+
+  .footer-right {
+    display: flex;
+    align-items: center;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: var(--space-lg);
+  }
+
+  .footer-link {
+    font-size: var(--font-size-sm);
+    color: hsl(var(--muted-foreground));
+    font-style: italic;
+  }
+
+  /* Responsive design for mobile devices */
+  @media (max-width: 768px) {
+    .header-content {
+      flex-direction: column;
+      gap: var(--space-lg);
+      padding: var(--space-md);
+    }
+
+    .header-left {
+      flex-direction: column;
+      text-align: center;
+      gap: var(--space-md);
+    }
+
+    .header-title {
+      font-size: var(--font-size-2xl);
+    }
+
+    .header-right {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .content-wrapper {
+      padding: 0 var(--space-md);
+      gap: var(--space-lg);
+    }
+
+    .legend-section {
+      padding: var(--space-lg);
+    }
+
+    .legend-content {
+      gap: var(--space-lg);
+    }
+
+    .legend-cell-demo {
+      width: 160px;
+      height: 200px;
+    }
+
+    .orbital-types {
+      gap: var(--space-md);
+    }
+
+    .footer-content {
+      flex-direction: column;
+      gap: var(--space-lg);
+      padding: var(--space-md);
+      text-align: center;
+    }
+
+    .footer-left {
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .header-title {
+      font-size: var(--font-size-xl);
+    }
+
+    .header-subtitle {
+      font-size: var(--font-size-sm);
+    }
+
+    .legend-cell-demo {
+      width: 140px;
+      height: 180px;
+    }
+
+    .orbital-visual {
+      width: 32px;
+      height: 32px;
+    }
+
+    .stat-item {
+      padding: var(--space-xs) var(--space-sm);
+    }
+
+    .stat-number {
+      font-size: var(--font-size-lg);
+    }
+  }
+
+  /* Remove borders from periodic table components */
   :global(.periodic-table-grid),
   :global(.element-cell),
   :global(.empty-cell),
   :global(.placeholder),
   :global(.series-label) {
     border: none !important;
-    box-shadow: none !important;
   }
-  /* Container for the periodic table and the floating legend */
-  .table-legend-container {
-    position: relative;
-    width: 100%;
-    min-height: 420px;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    justify-content: flex-start;
-  }
-  /* Styling for the legend when it's floating (desktop view) */
-  .legend-floating {
-    position: absolute;
-    left: 50%;
-    top: -20px;
-    transform: translateX(-50%);
-    z-index: 10;
-  }
-  /* Media query to make the legend static on smaller screens */
-  @media (max-width: 900px) {
-    .legend-floating {
-      position: static;
-      left: unset;
-      top: unset;
-      transform: none;
-      margin: 0 auto 0.5em auto;
-      display: block;
-    }
-    /* Reset min-height for the container on smaller screens */
-    .table-legend-container {
-      min-height: 0;
-    }
+
+  /* Enhance periodic table integration */
+  :global(.periodic-table-grid) {
+    background: transparent !important;
+    padding: var(--space-lg) !important;
   }
 </style> 

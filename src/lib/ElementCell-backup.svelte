@@ -2,8 +2,6 @@
   import { createEventDispatcher } from 'svelte';
   
   export let element;
-  export let isFiltered = false; // Element is filtered out (dimmed)
-  export let isHighlighted = false; // Element matches filter (highlighted)
   const dispatch = createEventDispatcher();
 
   function handleWikiClick(e) {
@@ -22,8 +20,6 @@
 
 <div 
   class="element-cell element-{categoryClass} glass rounded-lg border border-white/20 p-2 relative flex flex-col justify-between min-h-[100px] transition-all duration-300 hover:scale-105 hover:shadow-xl hover:border-primary/50"
-  class:filtered={isFiltered}
-  class:highlighted={isHighlighted}
   style="grid-column: {element.xpos}; grid-row: {element.ypos};"
   title="{element.name} ({element.category})"
 >
@@ -80,11 +76,6 @@
     border-color: rgba(255, 99, 132, 0.4);
   }
   
-  .element-alkaline-earth-metal {
-    background: linear-gradient(135deg, rgba(54, 162, 235, 0.3) 0%, rgba(54, 162, 235, 0.1) 100%);
-    border-color: rgba(54, 162, 235, 0.4);
-  }
-  
   .element-noble-gas {
     background: linear-gradient(135deg, rgba(83, 102, 255, 0.3) 0%, rgba(83, 102, 255, 0.1) 100%);
     border-color: rgba(83, 102, 255, 0.4);
@@ -95,88 +86,8 @@
     border-color: rgba(255, 205, 86, 0.4);
   }
   
-  .element-post-transition-metal {
-    background: linear-gradient(135deg, rgba(75, 192, 192, 0.3) 0%, rgba(75, 192, 192, 0.1) 100%);
-    border-color: rgba(75, 192, 192, 0.4);
-  }
-  
-  .element-metalloid {
-    background: linear-gradient(135deg, rgba(153, 102, 255, 0.3) 0%, rgba(153, 102, 255, 0.1) 100%);
-    border-color: rgba(153, 102, 255, 0.4);
-  }
-  
-  .element-diatomic-nonmetal {
-    background: linear-gradient(135deg, rgba(255, 159, 64, 0.3) 0%, rgba(255, 159, 64, 0.1) 100%);
-    border-color: rgba(255, 159, 64, 0.4);
-  }
-  
-  .element-polyatomic-nonmetal {
-    background: linear-gradient(135deg, rgba(199, 199, 199, 0.3) 0%, rgba(199, 199, 199, 0.1) 100%);
-    border-color: rgba(199, 199, 199, 0.4);
-  }
-  
-  .element-lanthanide {
-    background: linear-gradient(135deg, rgba(255, 99, 255, 0.3) 0%, rgba(255, 99, 255, 0.1) 100%);
-    border-color: rgba(255, 99, 255, 0.4);
-  }
-  
-  .element-actinide {
-    background: linear-gradient(135deg, rgba(255, 159, 255, 0.3) 0%, rgba(255, 159, 255, 0.1) 100%);
-    border-color: rgba(255, 159, 255, 0.4);
-  }
-  
-  .element-halogen {
-    background: linear-gradient(135deg, rgba(255, 206, 84, 0.3) 0%, rgba(255, 206, 84, 0.1) 100%);
-    border-color: rgba(255, 206, 84, 0.4);
-  }
-  
   .element-unknown {
     background: linear-gradient(135deg, rgba(201, 203, 207, 0.3) 0%, rgba(201, 203, 207, 0.1) 100%);
     border-color: rgba(201, 203, 207, 0.4);
   }
-
-  .element-cell:hover {
-    z-index: 10;
-  }
-
-  .element-cell:hover .text-2xl {
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-  }
-
-  /* Filtering states */
-  .element-cell.filtered {
-    opacity: 0.3;
-    transform: scale(0.95);
-    filter: grayscale(0.7);
-    pointer-events: none;
-  }
-
-  .element-cell.highlighted {
-    border-color: hsl(var(--primary)) !important;
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
-    transform: scale(1.02);
-    z-index: 10;
-    position: relative;
-  }
-
-  .element-cell.highlighted::before {
-    content: '';
-    position: absolute;
-    inset: -2px;
-    border-radius: inherit;
-    background: linear-gradient(45deg, hsl(var(--primary)), transparent, hsl(var(--primary)));
-    z-index: -1;
-    opacity: 0.3;
-    animation: pulse-border 2s ease-in-out infinite;
-  }
-
-  @keyframes pulse-border {
-    0%, 100% { opacity: 0.3; }
-    50% { opacity: 0.6; }
-  }
-
-  /* Smooth transitions for filtering */
-  .element-cell {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-</style> 
+</style>
