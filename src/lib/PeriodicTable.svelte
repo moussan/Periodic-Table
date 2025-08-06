@@ -9,6 +9,7 @@
   export let maxC = 18; // Max columns for the main table
   export let maxR = 7; // Max rows for the main table
   export let elementMap; // Map for quick lookup
+  export let comparisonMode = false; // Whether comparison mode is active
   
   // Create a set of filtered element numbers for quick lookup
   $: filteredElementNumbers = new Set(elements.map(el => el.number));
@@ -55,10 +56,12 @@
         {#if element && !(element.number >= lanthanideRange.start && element.number <= lanthanideRange.end) && !(element.number >= actinideRange.start && element.number <= actinideRange.end)}
           <ElementCell 
             {element} 
+            {comparisonMode}
             isFiltered={isFiltering && !filteredElementNumbers.has(element.number)}
             isHighlighted={isFiltering && filteredElementNumbers.has(element.number)}
             on:showWiki={e => dispatch('showWiki', e.detail)}
             on:showOrbitAnimation={e => dispatch('showOrbitAnimation', e.detail)}
+            on:elementToggle={e => dispatch('elementToggle', e.detail)}
           />
         
         <!-- Lanthanide placeholder -->
@@ -107,10 +110,12 @@
         {#each lanthanides as element}
           <ElementCell 
             element={{...element, xpos: element.display_xpos, ypos: 1}}
+            {comparisonMode}
             isFiltered={isFiltering && !filteredElementNumbers.has(element.number)}
             isHighlighted={isFiltering && filteredElementNumbers.has(element.number)} 
             on:showWiki={e => dispatch('showWiki', e.detail)}
             on:showOrbitAnimation={e => dispatch('showOrbitAnimation', e.detail)}
+            on:elementToggle={e => dispatch('elementToggle', e.detail)}
           />
         {/each}
       </div>
@@ -130,10 +135,12 @@
         {#each actinides as element}
           <ElementCell 
             element={{...element, xpos: element.display_xpos, ypos: 1}}
+            {comparisonMode}
             isFiltered={isFiltering && !filteredElementNumbers.has(element.number)}
             isHighlighted={isFiltering && filteredElementNumbers.has(element.number)} 
             on:showWiki={e => dispatch('showWiki', e.detail)}
             on:showOrbitAnimation={e => dispatch('showOrbitAnimation', e.detail)}
+            on:elementToggle={e => dispatch('elementToggle', e.detail)}
           />
         {/each}
       </div>

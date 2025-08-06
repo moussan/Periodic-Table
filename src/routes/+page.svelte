@@ -4,6 +4,8 @@
   import ElementModal from '$lib/ElementModal.svelte';
   import SearchPanel from '$lib/components/SearchPanel.svelte';
   import FilterPanel from '$lib/components/FilterPanel.svelte';
+  import ComparisonModeToggle from '$lib/components/ComparisonModeToggle.svelte';
+  import SelectedElementsPanel from '$lib/components/SelectedElementsPanel.svelte';
   import elementsData from '$lib/data/PeriodicTableJSON.json';
   import OrbitAnimationModal from '$lib/OrbitAnimationModal.svelte';
   import FLogo from '$lib/FLogo.svelte';
@@ -25,6 +27,7 @@
   // Use stores for state management
   let selectedElement = null;
   let orbitElement = null;
+  let comparisonMode = false;
   
   // Reactive statements for store subscriptions
   $: allElements = $elementsStore.length > 0 ? $elementsStore : elementsData.elements;
@@ -88,6 +91,35 @@
   function handleFilterToggle(event) {
     console.log('Filter panel toggled:', event.detail);
     // Just for debugging, no additional action needed
+  }
+
+  // Comparison mode event handlers
+  function handleComparisonToggle(event) {
+    comparisonMode = event.detail.comparisonMode;
+    console.log('Comparison mode toggled:', comparisonMode);
+  }
+
+  function handleElementToggle(event) {
+    console.log('Element selection toggled:', event.detail);
+  }
+
+  function handleSelectionCleared() {
+    console.log('Selection cleared');
+  }
+
+  function handleElementRemoved(event) {
+    console.log('Element removed from selection:', event.detail);
+  }
+
+  function handleCompareElements(event) {
+    console.log('Compare elements requested:', event.detail);
+    // TODO: Open comparison modal
+  }
+
+  function handleElementInfo(event) {
+    // Show element info when clicked from selected panel
+    selectedElement = event.detail.element;
+    setActiveModal('element-modal');
   }
 
   // Ensure all elements have xpos and ypos, and they are numbers
@@ -249,6 +281,21 @@
         </div>
       </section>
 
+      <!-- Comparison mode controls -->
+      <section class="comparison-section">
+        <ComparisonModeToggle 
+          {comparisonMode}
+          on:toggle={handleComparisonToggle}
+          on:selectionCleared={handleSelectionCleared}
+        />
+        
+        <SelectedElementsPanel 
+          on:elementRemoved={handleElementRemoved}
+          on:compare={handleCompareElements}
+          on:elementInfo={handleElementInfo}
+        />
+      </section>
+
       <!-- Enhanced periodic table container -->
       <div class="table-container">
         <PeriodicTable 
@@ -257,8 +304,10 @@
           {maxC} 
           {maxR} 
           {elementMap} 
+          {comparisonMode}
           on:showWiki={handleShowWiki}
           on:showOrbitAnimation={handleShowOrbitAnimation}
+          on:elementToggle={handleElementToggle}
         />
       </div>
     </div>
@@ -681,6 +730,14 @@
   .filter-section-wrapper {
     width: 100%;
     max-width: 1200px;
+  }
+
+  /* Comparison section */
+  .comparison-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    margin-bottom: var(--space-xl);
   }
 
   /* Table container */
