@@ -63,13 +63,6 @@
     dispatch('close');
   }
 
-  // Function to handle keyboard events. Specifically listens for the 'Escape' key to close the modal.
-  function handleKeydown(event) {
-    if (event.key === 'Escape') {
-      close();
-    }
-  }
-
   // Enhanced function to load external data with progress tracking
   async function loadExternalData() {
     if (!element || isLoadingExternal) return;
@@ -2012,8 +2005,8 @@
       padding: 16px;
     }
   }
-</style>   
-/* Isotopes Tab Styles */
+
+  /* Isotopes Tab Styles */
   .isotopes-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -2241,3 +2234,4 @@
       display: none;
     }
   }
+</style>

@@ -31,11 +31,12 @@
   $: y = center + shellRadius * Math.sin(angle);
 </script>
 
+<!-- Attributes for the SVG circle representing the electron -->
 <circle
-  <!-- Attributes for the SVG circle representing the electron -->
   cx={x}
+  cy={y}
   r={electronRadius}
   fill={color}
   stroke="#333"
   stroke-width="1"
-/> 
+/>

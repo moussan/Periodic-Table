@@ -16,7 +16,7 @@ export { PTableClient, ptableClient } from './ptable';
 export type { PTableResponse } from './ptable';
 
 // External data management
-export { 
+import { 
   ExternalDataManager, 
   externalDataManager,
   getElementExternalData,
@@ -26,6 +26,17 @@ export {
   clearAllCaches,
   getCacheStats
 } from './externalData';
+
+export { 
+  ExternalDataManager, 
+  externalDataManager,
+  getElementExternalData,
+  refreshElementData,
+  prefetchCommonElements,
+  getDataAvailabilityStats,
+  clearAllCaches,
+  getCacheStats
+};
 export type { ExternalDataOptions, ExternalDataResult } from './externalData';
 
 // Utility functions for common operations

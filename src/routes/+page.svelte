@@ -30,7 +30,10 @@
   let comparisonMode = false;
   
   // Reactive statements for store subscriptions
-  $: allElements = $elementsStore.length > 0 ? $elementsStore : elementsData.elements;
+  $: rawElements = $elementsStore.length > 0 ? $elementsStore : elementsData.elements;
+  $: allElements = (rawElements || []).filter(el => 
+    el && typeof el.xpos === 'number' && typeof el.ypos === 'number' && el.name
+  );
   $: filteredElements = $filteredElementsStore.length > 0 ? $filteredElementsStore : allElements;
   $: showWikiModal = $appStateStore.activeModal === 'element-modal';
   $: showOrbitModal = $appStateStore.activeModal === 'orbit-modal';
@@ -122,16 +125,16 @@
     setActiveModal('element-modal');
   }
 
-  // Ensure all elements have xpos and ypos, and they are numbers
-  allElements = allElements.filter(el => 
-    el && typeof el.xpos === 'number' && typeof el.ypos === 'number' && el.name
-  );
-
   // Create a map for quick lookup of elements by position
-  const elementMap = new Map();
-  allElements.forEach(el => {
-    elementMap.set(`${el.xpos}-${el.ypos}`, el);
-  });
+  $: elementMap = (() => {
+    const map = new Map();
+    if (allElements) {
+      allElements.forEach(el => {
+        map.set(`${el.xpos}-${el.ypos}`, el);
+      });
+    }
+    return map;
+  })();
 
   // Define the standard dimensions for the periodic table grid
   // Determine table dimensions
@@ -342,7 +345,6 @@
         </div>
       </div>
     </footer>
-  </main>
 </div>
 
 <style>
